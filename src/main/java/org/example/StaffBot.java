@@ -18,10 +18,7 @@ public class StaffBot extends TelegramLongPollingBot {
     public StaffBot(String botToken) {
         super(botToken);
     }
-    long id = 1;
-    {
-        id++;
-    }
+
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()){
@@ -37,21 +34,14 @@ public class StaffBot extends TelegramLongPollingBot {
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println("2");
-                User user = new User();
-                if (user == null){
-                    System.out.println("3");
-                    user = userService.create(
-                            new User(
-                                    id,
-                                    chatId,
-                                    update.getMessage().getText(),
-                                    Role.USER,
-                                    BotState.START
-                            )
-                    );
-                    System.out.println("4");
-                }
+
+                User user = new User(
+                        chatId,
+                        update.getMessage().getText(),
+                        Role.USER,
+                        BotState.START
+                );
+                user = userService.create(user);
             }
         }
     }
