@@ -13,4 +13,10 @@ import java.time.LocalDateTime;
 public class Stat {
     private long chatId;
     private LocalDateTime enterTime;
+    private String keyword;
+
+    public Stat(long chatId, LocalDateTime enterTime){
+        this.chatId = chatId;
+        this.enterTime = enterTime;
+    }
 }

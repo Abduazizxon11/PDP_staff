@@ -1,5 +1,8 @@
 package org.example.modul;
 
 public enum BotState {
-    START, REGISTER
+    PDP_START,
+    REGISTER,
+    ADMIN_START,
+    PAGE_ADMIN_GENERATE_KEYWORD
 }

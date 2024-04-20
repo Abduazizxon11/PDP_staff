@@ -1,25 +1,59 @@
 package org.example.modul;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
 public class User {
-    private long id;
     private long chatId;
     private String fullName;
-    private Role role;
-    private BotState state;
+    private String role;
+    private BotState botState;
 
-    public User(long chatId, String fullName, Role role, BotState state) {
+    @Override
+    public String toString() {
+        return  "chatId: " + chatId +
+                ", fullName: '" + fullName + '\n' +
+                ", role: '" + role + '\n' +
+                ", botState: '" + botState + '\n'
+                ;
+    }
+
+    public User(long chatId, String fullName, String role, BotState botState) {
         this.chatId = chatId;
         this.fullName = fullName;
         this.role = role;
-        this.state = state;
+        this.botState = botState;
+    }
+
+    public User() {
+    }
+
+    public long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(long chatId) {
+        this.chatId = chatId;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public BotState getBotState() {
+        return botState;
+    }
+
+    public void setBotState(BotState botState) {
+        this.botState = botState;
     }
 }

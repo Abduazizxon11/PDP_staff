@@ -1,7 +1,7 @@
 package org.example.repository;
 
+import org.example.UserDTO;
 import org.example.modul.BotState;
-import org.example.modul.Role;
 import org.example.modul.User;
 import org.example.util.CustomDataSource;
 
@@ -10,27 +10,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepository {
-    private final String selectAll = "SELECT * FROM users";
-    private final String selectById = "SELECT * FROM users WHERE id=?";
-    private final String insert = "INSERT INTO users (chat_id, full_name, role, bot_state) VALUES (?,?,?,?)";
-    private final String update = "UPDATE users SET full_name=?, bot_state=? WHERE id=?";
-    private final String delete = "DELETE FROM actor WHERE actor_id=?";
 
-    public List<User> selectAll() {
-        List<User> users = new ArrayList<>();
+    private final String selectByChatId =
+            "SELECT * FROM botusers WHERE chat_id=?";
+
+    private final String insertChatId =
+            "INSERT INTO botusers (chat_id,role,bot_state) VALUES (?,?,?)";
+
+    private final String updateFullName =
+            "UPDATE botusers SET full_name=? WHERE chat_id=?";
+
+    private final String updateState =
+            "UPDATE botusers SET bot_state=? WHERE chat_id=?";
+
+    private final String selectWithStat =
+            "SELECT full_name, enter_time FROM botusers INNER JOIN stat ON botusers.chat_id = stat.chat_id WHERE date(stat.enter_time)=DATE(NOW())";
+    public List<UserDTO> selectWithStat(){
+        List<UserDTO> users = new ArrayList<>();
 
         try (Connection connection =
                      CustomDataSource.getInstance().getConnection();
              Statement statement = connection.createStatement()
 
         ) {
-            ResultSet resultSet = statement.executeQuery(selectAll);
+            ResultSet resultSet = statement.executeQuery(selectWithStat);
             while (resultSet.next()) {
-                User user = new User();
-                user.setChatId(resultSet.getLong("chat_id"));
+                UserDTO user = new UserDTO();
                 user.setFullName(resultSet.getString("full_name"));
-                user.setRole(Role.valueOf(resultSet.getString("role")));
-                user.setState(BotState.valueOf(resultSet.getString("bot_state")));
+                user.setEnterTime(resultSet.getTimestamp("enter_time").toString());
+                users.add(user);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -38,73 +46,62 @@ public class UserRepository {
         return users;
     }
 
-    public User selectById(long id) {
-        User user = new User();
+    public void updateState(long chatId, BotState state){
         try (
                 Connection connection = CustomDataSource.getInstance().getConnection();
-                PreparedStatement ps = connection.prepareStatement(selectById, Statement.RETURN_GENERATED_KEYS)
+                PreparedStatement ps = connection.prepareStatement(updateState)
+        ){
+            ps.setString(1, state.name());
+            ps.setLong(2, chatId);
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean insertChatIdAndState(long chatId) {
+        try (
+                Connection connection = CustomDataSource.getInstance().getConnection();
+                PreparedStatement ps = connection.prepareStatement(insertChatId)
         ) {
-            ps.setObject(1, id);
+            ps.setLong(1, chatId);
+            ps.setString(2, "user");
+            ps.setString(3, BotState.PDP_START.name());
+            return ps.execute();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 
+    public User selectByChatId(long chatId) {
+        User user = new User();
+        try (
+                Connection con = CustomDataSource.getInstance().getConnection();
+                PreparedStatement ps = con.prepareStatement(selectByChatId)
+        ) {
+            ps.setLong(1, chatId);
             ResultSet resultSet = ps.executeQuery();
-            if (resultSet.next()) {
-                user.setFullName(resultSet.getString("full_name"));
-                user.setRole(Role.valueOf(resultSet.getString("role")));
-                user.setId(resultSet.getLong("id"));
-
+            if (!resultSet.next()) {
+                return null;
             }
+            user.setFullName(resultSet.getString("full_name"));
+            user.setBotState(BotState.valueOf(resultSet.getString("bot_state")));
+            user.setRole(resultSet.getString("role"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return user;
     }
-
-    public void create(User user) {
-        System.out.println(user.getRole());
-        long id = 0;
+    public User updateFullName(long chatId, String fullName) {
         try (
                 Connection connection = CustomDataSource.getInstance().getConnection();
-                PreparedStatement ps = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)
-        ) {
-            ps.setObject(1, user.getChatId());
-            ps.setObject(2, user.getFullName());
-            ps.setObject(3, String.valueOf(user.getRole()));
-            ps.setObject(4, String.valueOf(user.getState()));
-            int i = ps.executeUpdate();
-            System.out.println(i);
-//            ResultSet resultSet = ps.getGeneratedKeys();
-//            if (resultSet.next()) {
-//                id = resultSet.getLong(1);
-//            }
-            System.out.println(id);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+                PreparedStatement ps = connection.prepareStatement(updateFullName)
+        ){
+            ps.setObject(1, fullName);
+            ps.setObject(2, chatId);
 
-    public User update(User user) {
-        try (
-                Connection connection = CustomDataSource.getInstance().getConnection();
-                PreparedStatement ps = connection.prepareStatement(update, Statement.RETURN_GENERATED_KEYS)
-        ) {
-            ps.setObject(1, user.getFullName());
-            ps.setObject(2, user.getState());
-            ps.setObject(3, user.getId());
-
-            if (ps.executeUpdate() == 0) throw new SQLException("No user");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
-
-    public User delete(long id) {
-        try (
-                Connection connection = CustomDataSource.getInstance().getConnection();
-                PreparedStatement ps = connection.prepareStatement(delete, Statement.RETURN_GENERATED_KEYS)
-        ) {
-            ps.setObject(1, id);
-            ps.execute();
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
