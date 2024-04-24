@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepository {
-
     private final String selectByChatId =
             "SELECT * FROM botusers WHERE chat_id=?";
 

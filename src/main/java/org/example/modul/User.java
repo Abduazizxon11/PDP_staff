@@ -9,9 +9,9 @@ public class User {
     @Override
     public String toString() {
         return  "chatId: " + chatId +
-                ", fullName: '" + fullName + '\n' +
-                ", role: '" + role + '\n' +
-                ", botState: '" + botState + '\n'
+                ", fullName: '" + fullName +
+                ", role: '" + role +
+                ", botState: '" + botState
                 ;
     }
 
