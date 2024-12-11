@@ -16,7 +16,6 @@ public class ButtonService {
         List<KeyboardRow> rowList = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
 
-
         KeyboardButton button2 = new KeyboardButton();
         button2.setText("Bugungi ro'yxat \uD83D\uDCD1");
         row1.add(button2);
@@ -24,7 +23,6 @@ public class ButtonService {
         KeyboardButton button3 = new KeyboardButton();
         button3.setText("Sana bo'yicha tanlash \uD83D\uDCC5");
         row1.add(button3);
-
 
         rowList.add(row1);
         markup.setKeyboard(rowList);
