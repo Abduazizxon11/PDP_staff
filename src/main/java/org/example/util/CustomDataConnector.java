@@ -9,8 +9,8 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class CustomDataSource implements DataSource {
-    private static volatile  CustomDataSource instance;
+public class CustomDataConnector implements DataSource {
+    private static volatile CustomDataConnector instance;
     private  static final Object object = new Object();
     private  static final SQLException SQL_EXCEPTION = new SQLException();
     private final String driver;
@@ -18,23 +18,21 @@ public class CustomDataSource implements DataSource {
     private final String name;
     private final String password;
 
-    private CustomDataSource(String driver, String url, String password, String name){
+    private CustomDataConnector(String driver, String url, String password, String name){
         this.driver = driver;
         this.url = url;
         this.name = name;
         this.password = password;
     }
 
-    public static CustomDataSource getInstance() {
+    public static CustomDataConnector getInstance() {
         if (instance == null){
-
             synchronized (object){
-
                 if (instance == null){
                     try{
                         Properties properties = new Properties();
-                        properties.load(CustomDataSource.class.getClassLoader().getResourceAsStream("application.properties"));
-                        instance = new CustomDataSource(
+                        properties.load(CustomDataConnector.class.getClassLoader().getResourceAsStream("application.properties"));
+                        instance = new CustomDataConnector(
                                 properties.getProperty("postgres.driver"),
                                 properties.getProperty("postgres.url"),
                                 properties.getProperty("postgres.password"),
@@ -44,13 +42,10 @@ public class CustomDataSource implements DataSource {
                         e.printStackTrace();
                     }
                 }
-
             }
-
         }
         return instance;
     }
-
 
     @Override
     public Connection getConnection() throws SQLException {

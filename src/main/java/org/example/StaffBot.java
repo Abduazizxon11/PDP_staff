@@ -38,6 +38,7 @@ public class StaffBot extends TelegramLongPollingBot {
             } else if(text.contains("cancel") || text.contains("accept")){
                 String rChatId = text.substring(7);
                 if (text.contains("cancel")){
+                    send(rChatId, "Sizning hisobotingiz rad etildi");
                     send("1280496237", "Ushbu hisobot rad etildi va bu haqida o'qtuvchiga xabar yuborildi ✅");
                 } else if (text.contains("accept")) {
                     send(rChatId, "Sizning hisobotingiz qabul qilindi \uD83E\uDD73");
@@ -55,10 +56,10 @@ public class StaffBot extends TelegramLongPollingBot {
             Long chatId = update.getMessage().getChatId();
             String text = update.getMessage().getText();
 
-            if (userRepository.selectByChatId(update.getMessage().getChatId()) == null) {
-                userRepository.insertChatIdAndState(update.getMessage().getChatId());
+            if (userRepository.selectByChatId(chatId) == null) {
+                userRepository.insertChatIdAndState(chatId);
             }
-            User user = userRepository.selectByChatId(update.getMessage().getChatId());
+            User user = userRepository.selectByChatId(chatId);
 
             System.out.println(user.toString());
             if (text.equals("/start")) {
@@ -70,30 +71,30 @@ public class StaffBot extends TelegramLongPollingBot {
                         send(chatId, "Assalomu aleykum. Ro'yxatdan o'tish uchun ism-familiyangizni kiriting");
                     }
                     else {
-                        userRepository.updateState(update.getMessage().getChatId(), BotState.PDP_START);
+                        userRepository.updateState(chatId, BotState.PDP_START);
                         send(chatId, "Assalomu aleykum. Quydagilardan birini tanlang yoki ism o'zgartirmoqchi bo'lsangiz yozib jo'nating", buttonService.userMenu());
                     }
                 }
             } else if (text.contains("start")) {
                 String key = text.substring(6);
-                statRepository.create(update.getMessage().getChatId(), key);
+                statRepository.create(chatId, key);
                 send(chatId, "Sizning bugungi maktabga kirgan vaqtingiz muvaffaqiyatli qo'shildi");
                 System.out.println(user.getFullName());
 
                 if (user.getFullName() == null) {
                     send(chatId, "Assalomu aleykum. Ro'yxatdan o'tish uchun ism-familiyangizni kiriting");
-                    userRepository.updateState(update.getMessage().getChatId(), BotState.REGISTER);
+                    userRepository.updateState(chatId, BotState.REGISTER);
                 }
             } else {
                 if (user.getBotState() == BotState.PDP_START) {
                     send(chatId, "Assalomu aleykum. Ro'yxatdan o'tish uchun ism-familiyangizni kiriting");
-                    userRepository.updateState(update.getMessage().getChatId(), BotState.REGISTER);
+                    userRepository.updateState(chatId, BotState.REGISTER);
                 } else if (user.getBotState() == BotState.REGISTER) {
                     userRepository.updateFullName(chatId, text);
                     send(chatId, "Ismingiz muvaffaqiyatli kiritildi. Agar ismni o'zgartirmoqchi bo'lsangiz ismingizni yozib jo'nating yoki quydagilardan birini tanlang", buttonService.userMenu());
                 } else if (user.getBotState() == BotState.SEND_REPORT) {
                     copy(update.getMessage().getChatId(), "1280496237", update.getMessage().getMessageId(), "Yuboruvchi Ism-familiyasi: " + user.getFullName(), buttonService.acceptButton(update.getMessage().getChatId()));
-                    userRepository.updateState(update.getMessage().getChatId(), BotState.PDP_START);
+                    userRepository.updateState(chatId, BotState.PDP_START);
                 } else if (user.getRole().equals("ADMIN") && user.getBotState() == BotState.ADMIN_START) {
                     if (text.equals("Bugungi ro'yxat \uD83D\uDCD1")) {
                         List<UserDTO> userDTOS = userRepository.selectWithStat();
@@ -110,7 +111,7 @@ public class StaffBot extends TelegramLongPollingBot {
                         System.out.println(builder);
                         send(chatId, "Bugungi kelgan barcha xodimlar:\n" + builder);
                     } else if (text.equals("Sana bo'yicha tanlash \uD83D\uDCC5")) {
-                        send(update.getMessage().getChatId(), "Sanani tanlang.\n ⚠\uFE0F ESLATMA: FAQATGINA DASTUR ISHLATILGAN KUNLARDANGINA HISOBOT OLISH MUMKIN", buttonService.selectWithDate(12));
+                        send(chatId, "Sanani tanlang.\n ⚠\uFE0F ESLATMA: FAQATGINA DASTUR ISHLATILGAN KUNLARDANGINA HISOBOT OLISH MUMKIN", buttonService.selectWithDate(12));
                     } else if (text.equals("Yangi QR-Kod generatsiya qilish ")) {
                         userRepository.updateState(update.getMessage().getChatId(), BotState.PAGE_ADMIN_GENERATE_KEYWORD);
 

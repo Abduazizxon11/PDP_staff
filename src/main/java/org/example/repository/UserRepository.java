@@ -3,7 +3,7 @@ package org.example.repository;
 import org.example.UserDTO;
 import org.example.modul.BotState;
 import org.example.modul.User;
-import org.example.util.CustomDataSource;
+import org.example.util.CustomDataConnector;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class UserRepository {
         List<UserDTO> users = new ArrayList<>();
 
         try (Connection connection =
-                     CustomDataSource.getInstance().getConnection();
+                     CustomDataConnector.getInstance().getConnection();
              Statement statement = connection.createStatement()
 
         ) {
@@ -47,7 +47,7 @@ public class UserRepository {
 
     public void updateState(long chatId, BotState state){
         try (
-                Connection connection = CustomDataSource.getInstance().getConnection();
+                Connection connection = CustomDataConnector.getInstance().getConnection();
                 PreparedStatement ps = connection.prepareStatement(updateState)
         ){
             ps.setString(1, state.name());
@@ -61,7 +61,7 @@ public class UserRepository {
 
     public boolean insertChatIdAndState(long chatId) {
         try (
-                Connection connection = CustomDataSource.getInstance().getConnection();
+                Connection connection = CustomDataConnector.getInstance().getConnection();
                 PreparedStatement ps = connection.prepareStatement(insertChatId)
         ) {
             ps.setLong(1, chatId);
@@ -76,7 +76,7 @@ public class UserRepository {
     public User selectByChatId(long chatId) {
         User user = new User();
         try (
-                Connection con = CustomDataSource.getInstance().getConnection();
+                Connection con = CustomDataConnector.getInstance().getConnection();
                 PreparedStatement ps = con.prepareStatement(selectByChatId)
         ) {
             ps.setLong(1, chatId);
@@ -94,7 +94,7 @@ public class UserRepository {
     }
     public User updateFullName(long chatId, String fullName) {
         try (
-                Connection connection = CustomDataSource.getInstance().getConnection();
+                Connection connection = CustomDataConnector.getInstance().getConnection();
                 PreparedStatement ps = connection.prepareStatement(updateFullName)
         ){
             ps.setObject(1, fullName);

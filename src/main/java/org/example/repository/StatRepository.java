@@ -1,8 +1,7 @@
 package org.example.repository;
 
 import org.example.modul.Stat;
-import org.example.modul.User;
-import org.example.util.CustomDataSource;
+import org.example.util.CustomDataConnector;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -20,9 +19,8 @@ public class StatRepository {
         List<Stat> stats = new ArrayList<>();
 
         try (Connection connection =
-                     CustomDataSource.getInstance().getConnection();
+                     CustomDataConnector.getInstance().getConnection();
              Statement statement = connection.createStatement()
-
         ) {
             ResultSet resultSet = statement.executeQuery(selectAll);
             while (resultSet.next()) {
@@ -30,8 +28,6 @@ public class StatRepository {
                 stat.setChatId(resultSet.getLong("chat_id"));
                 stat.setEnterTime(resultSet.getTimestamp("enter_time").toLocalDateTime());
                 stat.setKeyword(resultSet.getString("keyword"));
-
-
                 stats.add(stat);
             }
         } catch (SQLException e) {
@@ -41,7 +37,7 @@ public class StatRepository {
     }
     public boolean create(long chatId, String keyword) {
         try (
-                Connection connection = CustomDataSource.getInstance().getConnection();
+                Connection connection = CustomDataConnector.getInstance().getConnection();
                 PreparedStatement ps = connection.prepareStatement(insertStat)
         ) {
             ps.setLong(1,chatId);
